@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -30,3 +31,9 @@ POSTS_PER_PAGE = 3
 MAX_SEARCH_RESULTS = 50
 
 WHOOSH_BASE = os.path.join(basedir, 'search.db')
+
+# available languages
+LANGUAGES = {
+     'en': 'English',
+     'es': 'Español'
+}
