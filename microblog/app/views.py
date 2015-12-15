@@ -7,7 +7,8 @@ from .forms import LoginForm, EditForm, PostForm, SearchForm
 from .models import User, Post
 from .emails import follower_notification
 from .translate import microsoft_translate
-from config import POSTS_PER_PAGE, MAX_SEARCH_RESULTS, LANGUAGES
+from flask.ext.sqlalchemy import get_debug_queries
+from config import POSTS_PER_PAGE, MAX_SEARCH_RESULTS, LANGUAGES, DATABASE_QUERY_TIMEOUT
 from flask.ext.babel import gettext
 from guess_language import guessLanguage
 
@@ -73,7 +74,6 @@ def login():
                            title='Sign In',
                            form=form,
                            providers=app.config['OPENID_PROVIDERS'])
-
 
 @oid.after_login
 def after_login(resp):
@@ -177,6 +177,20 @@ def unfollow(nickname):
     flash('You have stopped following ' + nickname + '.')
     return redirect(url_for('user', nickname=nickname))
 
+@app.route('/delete/<int:id>')
+@login_required
+def delete(id):
+    post = Post.query.get(id)
+    if post is None:
+         flash('Post not found.')
+         return redirect(url_for('index'))
+    if post.author.id != g.user.id:
+         flash('You cannot delete this post.')
+         return redirect(url_for('index'))
+    db.session.delete(post)
+    db.session.commit()
+    flash('Your post has been deleted.')
+    return redirect(url_for('index'))
 
 @app.route('/search', methods=['POST'])
 @login_required
@@ -207,3 +221,10 @@ def translate():
               request.form['text'],
               request.form['sourceLang'],
               request.form['destLang']) })
+
+@app.after_request
+def after_request(response):
+    for query in get_debug_queries():
+        if query.duration >= DATABASE_QUERY_TIMEOUT:
+        app.logger.warning("SLOW QUERY: %s\nParameters: %s\nDuration: %fs\nContext: %fs\nContext: %s\n" % (query.statement, query.parameters, query.duration, query.context))
+    return response

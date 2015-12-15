@@ -14,6 +14,7 @@ OPENID_PROVIDERS = [
 
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
 SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
+SQLALCHEMY_RECORD_QUERIES = True
 
 # mail server settings
 MAIL_SERVER = 'stmp.googlemail.com'
@@ -41,3 +42,6 @@ LANGUAGES = {
 # microsoft translation service
 MS_TRANSLATOR_CLIENT_ID = '' # enter your MS translator app id here
 MS_TRANSLATOR_CLIENT_SECRET = '' # enter your MS translator app secret here
+
+# slow database query threshold (in seconds)
+DATABASE_QUERY_TIMEOUT = 0.5
